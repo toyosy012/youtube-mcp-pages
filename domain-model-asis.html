@@ -1,0 +1,662 @@
+<title>youtube-mcp 現行ドメインモデル</title>
+
+<style>
+  :root {
+    --ground: #f6f7f9;
+    --surface: #ffffff;
+    --surface-sunk: #eef0f4;
+    --ink: #161a20;
+    --muted: #5b6470;
+    --faint: #8b94a1;
+    --rule: #dce0e7;
+    --accent: #0b6e75;
+    --accent-soft: #e2f0f0;
+    --warn: #96600f;
+    --warn-soft: #f6eddc;
+    --danger: #a1372c;
+    --shadow: 0 1px 2px rgba(20, 26, 34, .06);
+
+    --font-display: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, "Hoefler Text", Georgia, "Hiragino Mincho ProN", "Yu Mincho", serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0d1013;
+      --surface: #151a1f;
+      --surface-sunk: #1b2128;
+      --ink: #e4e8ed;
+      --muted: #97a1ad;
+      --faint: #6d7784;
+      --rule: #262d36;
+      --accent: #57c6cc;
+      --accent-soft: #12292c;
+      --warn: #d5a34a;
+      --warn-soft: #2b2317;
+      --danger: #df7565;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0d1013;
+    --surface: #151a1f;
+    --surface-sunk: #1b2128;
+    --ink: #e4e8ed;
+    --muted: #97a1ad;
+    --faint: #6d7784;
+    --rule: #262d36;
+    --accent: #57c6cc;
+    --accent-soft: #12292c;
+    --warn: #d5a34a;
+    --warn-soft: #2b2317;
+    --danger: #df7565;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 64px 28px 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+  }
+
+  .prose { max-width: 68ch; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 4.6vw, 44px);
+    line-height: 1.2;
+    font-weight: 600;
+    text-wrap: balance;
+    letter-spacing: .01em;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(21px, 2.8vw, 27px);
+    line-height: 1.3;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 640;
+    letter-spacing: .01em;
+  }
+
+  p { color: var(--ink); }
+  .lede { color: var(--muted); font-size: 17px; }
+
+  header.masthead {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 34px;
+    border-bottom: 1px solid var(--rule);
+  }
+  header.masthead .meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  section > .head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  code, .mono { font-family: var(--font-mono); font-size: .88em; }
+  p code, li code, td code {
+    background: var(--surface-sunk);
+    padding: .1em .34em;
+    border-radius: 3px;
+  }
+
+  figure {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    padding: 22px 22px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-x: auto;
+  }
+  figure svg {
+    display: block;
+    width: 100%;
+    min-width: 640px;
+    max-width: 100%;
+    height: auto;
+    color: var(--ink);
+  }
+  /* Presentation attributes sit below CSS in the cascade; restating the token
+     values here guarantees resolution regardless of var() support in attributes. */
+  figure svg { font-family: var(--font-body); }
+  figure svg [font-family] { font-family: var(--font-mono); }
+  figure svg [fill="var(--surface)"] { fill: var(--surface); }
+  figure svg [fill="var(--surface-sunk)"] { fill: var(--surface-sunk); }
+  figure svg [fill="var(--warn)"] { fill: var(--warn); }
+  figure svg [fill="var(--warn-soft)"] { fill: var(--warn-soft); }
+  figure svg [fill="var(--accent)"] { fill: var(--accent); }
+  figure svg [fill="var(--accent-soft)"] { fill: var(--accent-soft); }
+  figure svg [fill="var(--faint)"] { fill: var(--faint); }
+  figure svg [stroke="var(--warn)"] { stroke: var(--warn); }
+  figure svg [stroke="var(--accent)"] { stroke: var(--accent); }
+
+  figcaption {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--muted);
+    border-top: 1px solid var(--rule);
+    padding-top: 12px;
+    min-width: 640px;
+  }
+  figcaption b { color: var(--ink); font-weight: 620; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .table-wrap { overflow-x: auto; }
+  table th, table td {
+    text-align: left;
+    vertical-align: top;
+    padding: 10px 14px 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  table th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  table td.t { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+  table td.n { color: var(--muted); }
+
+  .seams {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .seam {
+    background: var(--surface);
+    padding: 18px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .seam .tag {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .seam p { font-size: 14px; line-height: 1.7; color: var(--muted); margin: 0; }
+  .seam p b { color: var(--ink); font-weight: 620; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    align-items: center;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .swatch { width: 22px; height: 0; border-top-width: 2px; border-top-style: solid; }
+  .swatch.solid { border-color: currentColor; }
+  .swatch.acc { border-color: var(--accent); }
+  .swatch.gap { border-color: var(--warn); border-top-style: dashed; }
+
+  footer.note {
+    border-top: 1px solid var(--rule);
+    padding-top: 26px;
+    font-size: 13.5px;
+    color: var(--faint);
+    max-width: 68ch;
+  }
+
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="eyebrow">As-Is domain model</div>
+    <h1>youtube-mcp が今持っているドメインモデル</h1>
+    <p class="lede prose">現行コードだけから読み取れる概念・型・判断の置き場所を図に起こしたもの。設計ドキュメント（<code>docs/</code>）の記述ではなく、<code>internal/</code> 配下の実装から逆算している。作り直しの起点として、<em>何が型になっていて、何がなっていないか</em>を境界線として示す。</p>
+    <div class="meta">
+      <span>branch: development</span>
+      <span>@ ac954c2</span>
+      <span>internal/{mcpserver, organizer, youtube, auth, config}</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="head prose">
+      <div class="eyebrow">Figure 1</div>
+      <h2>型の地図 — 実体として存在する概念</h2>
+      <p>この題材の中心語彙は「再生リスト」「動画」「エントリ」「視聴可否」の四つ。コード上で型を与えられているのはそのうち三つで、<b>動画そのものは型を持たない</b>。</p>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 980 400" role="img" aria-label="Playlist と PlaylistItem だけが構造体として存在し、Video は VideoID という文字列としてしか表現されていない型の地図">
+        <defs>
+          <marker id="f1arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+          </marker>
+          <marker id="f1arrowW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--warn)"/>
+          </marker>
+        </defs>
+
+        <!-- Playlist -->
+        <rect x="30" y="40" width="230" height="150" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".45"/>
+        <text x="45" y="67" font-family="var(--font-mono)" font-size="13" font-weight="600" fill="currentColor">youtube.Playlist</text>
+        <line x1="30" y1="80" x2="260" y2="80" stroke="currentColor" stroke-opacity=".2"/>
+        <text x="45" y="103" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".8">ID          string</text>
+        <text x="45" y="124" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".8">Title       string</text>
+        <text x="45" y="145" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".8">ItemCount   int64</text>
+        <text x="45" y="166" font-family="var(--font-mono)" font-size="12" fill="var(--warn)">Privacy     string</text>
+
+        <!-- Playlist -> PlaylistItem -->
+        <line x1="262" y1="115" x2="366" y2="115" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f1arrow)"/>
+        <text x="314" y="105" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity=".75">1 — *</text>
+        <text x="314" y="134" text-anchor="middle" font-family="var(--font-mono)" font-size="10.5" fill="var(--faint)">ListPlaylistItems</text>
+
+        <!-- PlaylistItem -->
+        <rect x="370" y="40" width="250" height="150" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".45"/>
+        <text x="385" y="67" font-family="var(--font-mono)" font-size="13" font-weight="600" fill="currentColor">youtube.PlaylistItem</text>
+        <line x1="370" y1="80" x2="620" y2="80" stroke="currentColor" stroke-opacity=".2"/>
+        <text x="385" y="103" font-family="var(--font-mono)" font-size="12" fill="var(--accent)">PlaylistItemID  string</text>
+        <text x="385" y="124" font-family="var(--font-mono)" font-size="12" fill="var(--accent)">VideoID         string</text>
+        <text x="385" y="145" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".8">Title           string</text>
+        <text x="385" y="166" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".8">Position        int64</text>
+
+        <!-- PlaylistItem -> Video -->
+        <line x1="622" y1="115" x2="726" y2="115" stroke="var(--warn)" stroke-dasharray="5 4" marker-end="url(#f1arrowW)"/>
+        <text x="674" y="105" text-anchor="middle" font-size="12" fill="var(--warn)">参照</text>
+        <text x="674" y="134" text-anchor="middle" font-family="var(--font-mono)" font-size="10.5" fill="var(--warn)">string</text>
+
+        <!-- Video (absent) -->
+        <rect x="730" y="40" width="220" height="150" rx="3" fill="none" stroke="var(--warn)" stroke-dasharray="6 4"/>
+        <text x="745" y="67" font-family="var(--font-mono)" font-size="13" font-weight="600" fill="var(--warn)">Video</text>
+        <text x="745" y="97" font-size="12.5" fill="var(--warn)">型として存在しない</text>
+        <text x="745" y="128" font-size="12" fill="currentColor" fill-opacity=".7">タイトルは PlaylistItem 側</text>
+        <text x="745" y="148" font-size="12" fill="currentColor" fill-opacity=".7">に写し取られた値</text>
+        <text x="745" y="172" font-size="12" fill="currentColor" fill-opacity=".7">尺・投稿者・公開日は無い</text>
+
+        <!-- Privacy callout -->
+        <line x1="100" y1="192" x2="100" y2="248" stroke="var(--warn)" stroke-dasharray="4 4"/>
+        <rect x="30" y="250" width="310" height="130" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-dasharray="6 4"/>
+        <text x="45" y="277" font-family="var(--font-mono)" font-size="12.5" font-weight="600" fill="var(--warn)">Privacy: string</text>
+        <text x="45" y="303" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".8">"public" | "unlisted" | "private"</text>
+        <text x="45" y="330" font-size="12" fill="currentColor" fill-opacity=".8">取りうる値はコメントにしかない。</text>
+        <text x="45" y="352" font-size="12" fill="currentColor" fill-opacity=".8">型も検証も無く、MCP 入力の文字列が</text>
+        <text x="45" y="371" font-size="12" fill="currentColor" fill-opacity=".8">そのまま API まで通る。</text>
+
+        <!-- Availability enum -->
+        <rect x="390" y="250" width="250" height="130" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="405" y="277" font-family="var(--font-mono)" font-size="12.5" font-weight="600" fill="var(--accent)">youtube.Availability</text>
+        <line x1="390" y1="289" x2="640" y2="289" stroke="var(--accent)" stroke-opacity=".35"/>
+        <text x="405" y="311" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".85">available</text>
+        <text x="405" y="331" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".85">deleted</text>
+        <text x="405" y="351" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".85">private</text>
+        <text x="405" y="371" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".85">region_blocked</text>
+
+        <!-- VideoStatus -->
+        <line x1="840" y1="192" x2="840" y2="248" stroke="currentColor" stroke-opacity=".45" marker-end="url(#f1arrow)"/>
+        <text x="852" y="226" font-size="11.5" fill="var(--faint)">判定結果</text>
+        <rect x="730" y="250" width="220" height="130" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".45"/>
+        <text x="745" y="277" font-family="var(--font-mono)" font-size="12.5" font-weight="600" fill="currentColor">youtube.VideoStatus</text>
+        <line x1="730" y1="289" x2="950" y2="289" stroke="currentColor" stroke-opacity=".2"/>
+        <text x="745" y="313" font-family="var(--font-mono)" font-size="12" fill="currentColor" fill-opacity=".8">VideoID      string</text>
+        <text x="745" y="335" font-family="var(--font-mono)" font-size="12" fill="var(--accent)">Availability</text>
+        <text x="745" y="364" font-size="11.5" fill="var(--faint)">動画本体とは別物として扱われる</text>
+        <line x1="728" y1="330" x2="644" y2="330" stroke="var(--accent)" marker-end="url(#f1arrow)" stroke-opacity=".7"/>
+      </svg>
+      <figcaption><b>型を持つのは Playlist・PlaylistItem・Availability・VideoStatus の四つだけ。</b>動画は <code>VideoID string</code> としてしか存在せず、タイトルは再生リストのエントリ側に写し取られた値を使っている。列挙が必要な概念は二つあるのに、型になっているのは <code>Availability</code> だけで <code>Privacy</code> は素の文字列のまま — 同じ性質のものが非対称に扱われている。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="head prose">
+      <div class="eyebrow">Figure 2</div>
+      <h2>判断がどこに置かれているか</h2>
+      <p>functional core / imperative shell の分離自体は効いていて、純粋関数は <code>organizer</code> に六つ集まっている。ただし「ドメインの決まりごと」はその六つの外にも散っている。下図の破線チップが、純粋関数として取り出されずコードに直書きされている判断。</p>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 980 660" role="img" aria-label="mcpserver・organizer・youtube・adapter の4層と、各層に散在するドメイン判断の位置">
+        <defs>
+          <marker id="f2arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- lane 1 -->
+        <text x="12" y="72" font-family="var(--font-mono)" font-size="12.5" font-weight="600" fill="currentColor">mcpserver</text>
+        <text x="12" y="90" font-family="var(--font-mono)" font-size="10.5" fill="var(--faint)">protocol</text>
+        <rect x="140" y="30" width="820" height="110" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".35"/>
+        <text x="160" y="58" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".85">list_playlists · list_playlist_items · find_duplicates · find_unavailable</text>
+        <text x="160" y="78" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".85">remove_items · move_items · create_playlist · delete_playlist</text>
+        <rect x="655" y="92" width="288" height="30" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-dasharray="5 4"/>
+        <text x="669" y="112" font-size="11.5" fill="var(--warn)">判断: dryRun 未指定 → true（安全既定）</text>
+        <text x="160" y="112" font-size="11.5" fill="var(--faint)">入出力スキーマの整形のみ</text>
+
+        <line x1="550" y1="142" x2="550" y2="168" stroke="currentColor" stroke-opacity=".5" marker-end="url(#f2arrow)"/>
+
+        <!-- lane 2 -->
+        <text x="12" y="252" font-family="var(--font-mono)" font-size="12.5" font-weight="600" fill="currentColor">organizer</text>
+        <text x="12" y="270" font-family="var(--font-mono)" font-size="10.5" fill="var(--faint)">core + shell</text>
+        <rect x="140" y="170" width="820" height="210" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".35"/>
+
+        <rect x="160" y="190" width="380" height="170" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="176" y="214" font-size="12" font-weight="600" fill="var(--accent)">純粋コア（値 → 値）</text>
+        <text x="176" y="240" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".85">DetectDuplicates</text>
+        <text x="176" y="260" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".85">SelectUnavailable</text>
+        <text x="176" y="280" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".85">PlanMove</text>
+        <text x="176" y="300" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".85">ShouldDeleteSource</text>
+        <text x="176" y="320" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".85">ClassifyMoves</text>
+        <text x="176" y="340" font-family="var(--font-mono)" font-size="11.5" fill="currentColor" fill-opacity=".85">PlaylistIsEmpty</text>
+
+        <rect x="565" y="190" width="378" height="170" rx="3" fill="var(--surface-sunk)" stroke="currentColor" stroke-opacity=".3"/>
+        <text x="581" y="214" font-size="12" font-weight="600" fill="currentColor">殻 <tspan font-family="var(--font-mono)" font-size="11.5">*service</tspan>（逐次 I/O）</text>
+        <rect x="581" y="228" width="346" height="26" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-dasharray="5 4"/>
+        <text x="593" y="246" font-size="11.5" fill="var(--warn)">判断: privacy 既定 = "private"</text>
+        <rect x="581" y="260" width="346" height="26" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-dasharray="5 4"/>
+        <text x="593" y="278" font-size="11.5" fill="var(--warn)">判断: region 既定 = 環境変数</text>
+        <rect x="581" y="292" width="346" height="26" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-dasharray="5 4"/>
+        <text x="593" y="310" font-size="11.5" fill="var(--warn)">判断: destPlaylistId と newTitle は排他</text>
+        <text x="581" y="340" font-size="11.5" fill="var(--faint)">いずれも名前を持たず、if 文として埋まっている</text>
+
+        <line x1="550" y1="382" x2="550" y2="408" stroke="currentColor" stroke-opacity=".5" marker-end="url(#f2arrow)"/>
+
+        <!-- lane 3 -->
+        <text x="12" y="452" font-family="var(--font-mono)" font-size="12.5" font-weight="600" fill="currentColor">youtube</text>
+        <text x="12" y="470" font-family="var(--font-mono)" font-size="10.5" fill="var(--faint)">port + types</text>
+        <rect x="140" y="410" width="820" height="110" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".35"/>
+        <rect x="160" y="428" width="240" height="74" rx="3" fill="var(--surface-sunk)" stroke="currentColor" stroke-opacity=".3"/>
+        <text x="176" y="452" font-family="var(--font-mono)" font-size="12" font-weight="600" fill="currentColor">Client</text>
+        <text x="176" y="474" font-size="11.5" fill="currentColor" fill-opacity=".8">8 メソッドの単一ポート</text>
+        <text x="176" y="492" font-size="11.5" fill="var(--faint)">読取・書込・削除が同居</text>
+        <rect x="420" y="428" width="250" height="74" rx="3" fill="var(--surface-sunk)" stroke="currentColor" stroke-opacity=".3"/>
+        <text x="436" y="452" font-size="12" font-weight="600" fill="currentColor">ドメイン型</text>
+        <text x="436" y="474" font-size="11.5" fill="var(--warn)">json タグ付き = MCP 出力形式</text>
+        <text x="436" y="492" font-size="11.5" fill="var(--faint)">API 応答形状も兼ねている</text>
+        <rect x="690" y="428" width="253" height="74" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="706" y="452" font-family="var(--font-mono)" font-size="12" font-weight="600" fill="var(--accent)">JudgeAvailability</text>
+        <text x="706" y="474" font-size="11.5" fill="currentColor" fill-opacity=".8">純粋関数。ただし organizer</text>
+        <text x="706" y="492" font-size="11.5" fill="currentColor" fill-opacity=".8">の純粋コアとは別の層にある</text>
+
+        <line x1="550" y1="558" x2="550" y2="524" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="5 4" marker-end="url(#f2arrow)"/>
+        <text x="562" y="546" font-size="11" fill="var(--faint)">implements</text>
+
+        <!-- lane 4 -->
+        <text x="12" y="602" font-family="var(--font-mono)" font-size="12.5" font-weight="600" fill="currentColor">adapter</text>
+        <text x="12" y="620" font-family="var(--font-mono)" font-size="10.5" fill="var(--faint)">infra</text>
+        <rect x="140" y="560" width="820" height="80" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".35"/>
+        <text x="160" y="590" font-size="12" fill="currentColor" fill-opacity=".85">apiClient — Google API 型 ⇄ ドメイン型の変換、50 件バッチ、ページング</text>
+        <text x="160" y="616" font-size="12" fill="currentColor" fill-opacity=".85">auth（OAuth2 / loopback）· config（環境変数）</text>
+        <text x="943" y="590" text-anchor="end" font-family="var(--font-mono)" font-size="11.5" fill="var(--faint)">YouTube Data API v3</text>
+        <text x="943" y="616" text-anchor="end" font-family="var(--font-mono)" font-size="11.5" fill="var(--faint)">Mine(true) = 所有者は暗黙</text>
+      </svg>
+      <figcaption><b>ドメイン判断は 4 層すべてに散っている。</b>名前の付いた純粋関数は <code>organizer</code> に集約されている一方、<code>dryRun</code> の安全既定は MCP 層、<code>privacy</code>／<code>region</code> の既定値と「宛先は ID か新規タイトルのどちらか一方」という不変条件は殻の <code>if</code> 文、視聴可否の判定規則だけが <code>youtube</code> 層にある。判断の総体を一箇所で読める場所が無い。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="head prose">
+      <div class="eyebrow">Figure 3</div>
+      <h2>検出と実行のあいだに何も無い</h2>
+      <p>「整頓」というこのサーバの中心行為は、<b>検出</b>と<b>実行</b>という二回の独立した MCP 呼び出しに分かれている。その二回をつなぐ計画そのものは、どこにも型として存在しない。</p>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 980 330" role="img" aria-label="find_duplicates が返す削除候補と remove_items のあいだにサーバ側の状態が無く、ID の配列だけがクライアント経由で運ばれる流れ">
+        <defs>
+          <marker id="f3arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+          </marker>
+          <marker id="f3arrowW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--warn)"/>
+          </marker>
+        </defs>
+
+        <rect x="20" y="60" width="160" height="100" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".45"/>
+        <text x="34" y="88" font-family="var(--font-mono)" font-size="12" font-weight="600" fill="currentColor">find_duplicates</text>
+        <text x="34" y="114" font-family="var(--font-mono)" font-size="11" fill="currentColor" fill-opacity=".75">playlistId</text>
+        <text x="34" y="134" font-family="var(--font-mono)" font-size="11" fill="currentColor" fill-opacity=".75">keep</text>
+
+        <line x1="182" y1="110" x2="226" y2="110" stroke="currentColor" stroke-opacity=".5" marker-end="url(#f3arrow)"/>
+
+        <rect x="230" y="45" width="230" height="130" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".45"/>
+        <text x="244" y="71" font-family="var(--font-mono)" font-size="12" font-weight="600" fill="currentColor">DuplicateGroup</text>
+        <line x1="230" y1="83" x2="460" y2="83" stroke="currentColor" stroke-opacity=".2"/>
+        <text x="244" y="105" font-family="var(--font-mono)" font-size="11" fill="currentColor" fill-opacity=".75">VideoID / Title</text>
+        <text x="244" y="127" font-family="var(--font-mono)" font-size="11" fill="var(--accent)">KeepItemID</text>
+        <text x="244" y="149" font-family="var(--font-mono)" font-size="11" fill="var(--accent)">RemoveItemIDs []string</text>
+
+        <line x1="462" y1="110" x2="486" y2="110" stroke="currentColor" stroke-opacity=".5" marker-end="url(#f3arrow)"/>
+
+        <rect x="490" y="30" width="150" height="250" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-dasharray="6 4"/>
+        <text x="565" y="58" text-anchor="middle" font-family="var(--font-mono)" font-size="11" letter-spacing=".12em" fill="var(--warn)">GAP</text>
+        <text x="565" y="96" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--warn)">サーバ側に</text>
+        <text x="565" y="116" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--warn)">状態が無い</text>
+        <text x="565" y="152" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".8">整頓計画は</text>
+        <text x="565" y="172" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".8">クライアント（LLM）の</text>
+        <text x="565" y="192" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".8">文脈にしか存在しない</text>
+        <text x="565" y="226" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".8">検出時点と実行時点で</text>
+        <text x="565" y="246" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".8">再生リストが同じ保証も無い</text>
+
+        <line x1="642" y1="110" x2="676" y2="110" stroke="currentColor" stroke-opacity=".5" marker-end="url(#f3arrow)"/>
+
+        <rect x="680" y="45" width="270" height="145" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".45"/>
+        <text x="694" y="71" font-family="var(--font-mono)" font-size="12" font-weight="600" fill="currentColor">remove_items</text>
+        <line x1="680" y1="83" x2="950" y2="83" stroke="currentColor" stroke-opacity=".2"/>
+        <text x="694" y="105" font-family="var(--font-mono)" font-size="11" fill="currentColor" fill-opacity=".75">playlistItemIds []string</text>
+        <text x="694" y="125" font-family="var(--font-mono)" font-size="11" fill="currentColor" fill-opacity=".75">dryRun bool</text>
+        <text x="694" y="152" font-size="11.5" fill="var(--warn)">dryRun=true は入力をそのまま返す</text>
+        <text x="694" y="172" font-size="11.5" fill="var(--warn)">（存在確認も妥当性検査もしない）</text>
+
+        <text x="565" y="306" text-anchor="middle" font-size="12" fill="var(--faint)">ID の配列だけが、呼び出しをまたいで手で運ばれる</text>
+
+        <line x1="345" y1="177" x2="345" y2="232" stroke="var(--warn)" stroke-dasharray="4 4" marker-end="url(#f3arrowW)"/>
+        <text x="345" y="256" text-anchor="middle" font-size="11.5" fill="var(--warn)">「どれを残すか」という決定は</text>
+        <text x="345" y="276" text-anchor="middle" font-size="11.5" fill="var(--warn)">実行側に一切渡らない</text>
+      </svg>
+      <figcaption><b>検出が出した判断は実行側に届かない。</b><code>DuplicateGroup</code> は「残す 1 件」と「消す候補」を決めているのに、<code>remove_items</code> が受け取るのは平坦な ID 配列だけで、それがどの重複グループの決定だったかを知る手立ては無い。<code>dryRun=true</code> も入力の複製を返すだけ（<code>move.go:113</code>）で、実行時に何が起きるかの予行にはなっていない。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="head prose">
+      <div class="eyebrow">Figure 4</div>
+      <h2>move の途中に生まれる、型の無い状態</h2>
+      <p>移動は insert → delete の二段で行われる。その間に「両方の再生リストに存在する」という中間状態が必然的に生まれ、delete が失敗するとそこで固定される。この状態はコード中で <em>transient duplicate</em> と呼ばれているが、文字列メッセージの中にしか存在しない。</p>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 940 300" role="img" aria-label="move 実行中の 1 アイテムの状態遷移。insert 成功で両方に存在し、delete 失敗するとその状態のまま残る">
+        <defs>
+          <marker id="f4arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+          </marker>
+          <marker id="f4arrowW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--warn)"/>
+          </marker>
+        </defs>
+
+        <rect x="30" y="55" width="190" height="72" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".45"/>
+        <text x="125" y="88" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">source のみ</text>
+        <text x="125" y="110" text-anchor="middle" font-size="11.5" fill="var(--faint)">初期状態</text>
+
+        <line x1="222" y1="91" x2="356" y2="91" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f4arrow)"/>
+        <text x="289" y="80" text-anchor="middle" font-family="var(--font-mono)" font-size="10.5" fill="currentColor" fill-opacity=".8">InsertPlaylistItem ok</text>
+
+        <rect x="360" y="55" width="210" height="72" rx="3" fill="var(--warn-soft)" stroke="var(--warn)"/>
+        <text x="465" y="88" text-anchor="middle" font-size="13" font-weight="600" fill="var(--warn)">両方に存在</text>
+        <text x="465" y="110" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".75">dest に挿入済 / source 未削除</text>
+
+        <line x1="572" y1="91" x2="706" y2="91" stroke="currentColor" stroke-opacity=".55" marker-end="url(#f4arrow)"/>
+        <text x="639" y="80" text-anchor="middle" font-family="var(--font-mono)" font-size="10.5" fill="currentColor" fill-opacity=".8">DeletePlaylistItem ok</text>
+        <text x="639" y="112" text-anchor="middle" font-family="var(--font-mono)" font-size="10.5" fill="var(--accent)">gate: ShouldDeleteSource</text>
+
+        <rect x="710" y="55" width="190" height="72" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="805" y="88" text-anchor="middle" font-size="13" font-weight="600" fill="var(--accent)">dest のみ</text>
+        <text x="805" y="110" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".75">moved に記録</text>
+
+        <line x1="125" y1="129" x2="125" y2="186" stroke="currentColor" stroke-opacity=".5" marker-end="url(#f4arrow)"/>
+        <text x="137" y="163" font-size="11.5" fill="currentColor" fill-opacity=".8">insert 失敗</text>
+        <rect x="30" y="190" width="190" height="76" rx="3" fill="var(--surface)" stroke="currentColor" stroke-opacity=".45"/>
+        <text x="125" y="218" text-anchor="middle" font-size="12.5" fill="currentColor">source のまま</text>
+        <text x="125" y="240" text-anchor="middle" font-size="11.5" fill="var(--faint)">failed に記録</text>
+        <text x="125" y="258" text-anchor="middle" font-size="11.5" fill="var(--faint)">データは失われない</text>
+
+        <line x1="465" y1="129" x2="465" y2="186" stroke="var(--warn)" marker-end="url(#f4arrowW)"/>
+        <text x="477" y="163" font-size="11.5" fill="var(--warn)">delete 失敗</text>
+        <rect x="330" y="190" width="290" height="76" rx="3" fill="var(--warn-soft)" stroke="var(--warn)" stroke-dasharray="6 4"/>
+        <text x="475" y="216" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--warn)">両方に残ったまま終わる</text>
+        <text x="475" y="238" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".8">"transient duplicate" という語は</text>
+        <text x="475" y="256" text-anchor="middle" font-size="11.5" fill="currentColor" fill-opacity=".8">ItemError.Error の文字列の中だけ</text>
+
+        <rect x="660" y="190" width="240" height="76" rx="3" fill="none" stroke="currentColor" stroke-opacity=".3" stroke-dasharray="6 4"/>
+        <text x="780" y="218" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity=".8">再試行・整合性の回復を</text>
+        <text x="780" y="240" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity=".8">表す型も操作も無い</text>
+        <text x="780" y="258" text-anchor="middle" font-size="11.5" fill="var(--faint)">結果は string に潰れる</text>
+      </svg>
+      <figcaption><b>最も重要な安全規則は純粋関数になっているのに、その結果生まれる状態はモデル化されていない。</b><code>ShouldDeleteSource</code> は「挿入に成功したときだけ元を消す」というデータ保全規則を名前付きの述語として持っている。しかし挿入成功・削除失敗で生じる二重登録状態は、<code>ItemError{ItemID, Error string}</code> の文字列に潰され、呼び出し側が機械的に判別して回復する手段が無い。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="head prose">
+      <div class="eyebrow">Inventory</div>
+      <h2>型の棚卸し</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>概念</th>
+            <th>型</th>
+            <th>置き場所</th>
+            <th>現状</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>再生リスト</td><td class="t">youtube.Playlist</td><td class="t">youtube</td><td class="n">API 応答・ドメイン・MCP 出力を 1 つの構造体が兼ねる</td></tr>
+          <tr><td>再生リストのエントリ</td><td class="t">youtube.PlaylistItem</td><td class="t">youtube</td><td class="n">削除単位。同上の三役</td></tr>
+          <tr><td>動画</td><td class="t">—</td><td class="t">—</td><td class="n">型が無い。<code>VideoID string</code> のみ</td></tr>
+          <tr><td>視聴可否</td><td class="t">youtube.Availability</td><td class="t">youtube</td><td class="n">唯一まともに列挙されている値オブジェクト</td></tr>
+          <tr><td>公開範囲</td><td class="t">—</td><td class="t">—</td><td class="n">素の <code>string</code>。既定値は殻に直書き</td></tr>
+          <tr><td>地域制限</td><td class="t">youtube.RegionRestriction</td><td class="t">youtube</td><td class="n">判定関数への入力用。API 型からの写し</td></tr>
+          <tr><td>重複グループ</td><td class="t">organizer.DuplicateGroup</td><td class="t">organizer</td><td class="n">検出結果。実行側には渡らない</td></tr>
+          <tr><td>無効エントリ</td><td class="t">organizer.UnavailableItem</td><td class="t">organizer</td><td class="n">同上</td></tr>
+          <tr><td>残す方針</td><td class="t">organizer.KeepPolicy</td><td class="t">organizer</td><td class="n">oldest / newest。位置の大小でしか判定できない</td></tr>
+          <tr><td>移動要求</td><td class="t">organizer.MoveInput</td><td class="t">organizer</td><td class="n">宛先の排他条件が型で表現されていない</td></tr>
+          <tr><td>移動の試行結果</td><td class="t">organizer.MoveAttempt</td><td class="t">organizer</td><td class="n">エラーを <code>string</code> 二本で保持</td></tr>
+          <tr><td>実行結果</td><td class="t">Remove/MoveResult</td><td class="t">organizer</td><td class="n"><code>dryRun</code> フラグを結果側にも持つ</td></tr>
+          <tr><td>失敗</td><td class="t">organizer.ItemError</td><td class="t">organizer</td><td class="n">理由が文字列。分類不能</td></tr>
+          <tr><td>整頓計画</td><td class="t">—</td><td class="t">—</td><td class="n">型が無い。検出と実行のあいだに状態が存在しない</td></tr>
+          <tr><td>所有者 / チャンネル</td><td class="t">—</td><td class="t">—</td><td class="n">型が無い。<code>Mine(true)</code> として API 呼び出しに埋没</td></tr>
+          <tr><td>並び順</td><td class="t">—</td><td class="t">—</td><td class="n"><code>Position</code> を読むだけ。並べ替えの概念が無い</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="head prose">
+      <div class="eyebrow">Seams</div>
+      <h2>作り直すときに切れ目になりそうな箇所</h2>
+      <p>いずれも「今の実装が壊れている」という話ではなく、<em>モデルとして言語化されていないもの</em>の一覧。</p>
+    </div>
+    <div class="seams">
+      <div class="seam">
+        <div class="tag">同一性</div>
+        <p><b>二種類の ID がどちらも <code>string</code>。</b>削除の単位は <code>PlaylistItemID</code>、同一性の単位は <code>VideoID</code>。区別はコメントでしか保証されていない。</p>
+      </div>
+      <div class="seam">
+        <div class="tag">層の兼務</div>
+        <p><b>1 つの構造体が 3 役を負っている。</b><code>youtube.Playlist</code> は API 応答の形・ドメイン概念・MCP 出力スキーマを同時に担う。片方を変えると他方が動く。</p>
+      </div>
+      <div class="seam">
+        <div class="tag">集約境界</div>
+        <p><b>再生リストと、その中身の関係が型に無い。</b><code>ItemCount</code> と実際の items は別経路で取得され、<code>DeletePlaylist</code> は全件列挙から線形探索して件数を見る。</p>
+      </div>
+      <div class="seam">
+        <div class="tag">中核概念</div>
+        <p><b>「整頓」を表す型が無い。</b>検出結果と実行要求をつなぐのは平坦な ID 配列だけ。計画・承認・適用という段階が概念として存在しない。</p>
+      </div>
+      <div class="seam">
+        <div class="tag">安全性</div>
+        <p><b><code>dryRun</code> が引数として全層を貫通している。</b>「計画を作る」と「計画を適用する」の分離で表せるものが、bool フラグとして入力にも結果にも現れている。</p>
+      </div>
+      <div class="seam">
+        <div class="tag">不変条件</div>
+        <p><b>規則の置き場所が層ごとにばらばら。</b>空チェックは <code>organizer</code>、視聴可否は <code>youtube</code>、宛先の排他は殻の <code>if</code>、安全既定は MCP 層。</p>
+      </div>
+      <div class="seam">
+        <div class="tag">失敗の表現</div>
+        <p><b>エラーが <code>string</code> に潰れる。</b>「挿入失敗」と「二重登録のまま残った」は回復手順がまるで違うのに、呼び出し側からは同じ形で届く。</p>
+      </div>
+      <div class="seam">
+        <div class="tag">ポート</div>
+        <p><b><code>Client</code> が 8 メソッドの単一インタフェース。</b>読取・作成・削除が同居し、ユースケースが増えるたびに肥大する。分割の軸がまだ引かれていない。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="note">
+    図中の <span class="mono" style="color:var(--accent)">実線・アクセント色</span>＝型として存在するもの、<span class="mono" style="color:var(--warn)">破線・琥珀色</span>＝概念としては動いているがモデル化されていないもの。出典はすべて <code>internal/</code> 配下の実装（<code>youtube/client.go</code>, <code>youtube/availability.go</code>, <code>youtube/api.go</code>, <code>organizer/*.go</code>, <code>mcpserver/*.go</code>）。
+  </footer>
+
+</div>
